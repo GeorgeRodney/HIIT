@@ -47,8 +47,6 @@ int main(void)
   MX_TIM10_Init();
   HAL_TIM_Base_Start_IT(&htim10);
 
-  uint16_t prevTime = msCounter;
-
   while (1)
   {
     ButtonPollingDebounced();
