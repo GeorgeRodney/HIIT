@@ -46,6 +46,8 @@ void Error_Handler(void);
 #define COUNTER_MAX 15000
 #define COUNTER_MIN 0
 
+extern TIM_HandleTypeDef htim10;
+
 typedef struct {
   uint16_t pin;
   GPIO_TypeDef* port;
