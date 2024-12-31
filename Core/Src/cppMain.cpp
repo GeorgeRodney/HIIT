@@ -10,6 +10,7 @@ void PlayBuzzer(TIM_HandleTypeDef* htim, Sounds beep);
 volatile uint32_t msCounter = 0;
 volatile uint32_t seconds = 0;
 uint32_t prevTime_;
+uint32_t sprintBeepTime_;
 
 ButtonGPIOConfig buttonConfigs[BUTTON_COUNT] = {
   {BUTTON_PIN, BUTTON_GPIO_PORT}
@@ -25,13 +26,16 @@ void EventLoopCpp(void)
     ButtonPollingDebounced();
 
     if(sysState_ == PLAY)
-    {
-        if((seconds - prevTime_) >= 3)
+    {   
+        if((seconds - prevTime_) >= 3) // MAKE THIS TIME USER DETERMINED
         {
             PlayBuzzer(&htim11, SPRINT);
             prevTime_ = seconds;
+            sprintBeepTime_ = prevTime_;
         }
     }
+
+    // Ill need more timing thingys. 
 }
 
 extern "C"
@@ -62,11 +66,11 @@ void PlayBuzzer(TIM_HandleTypeDef *htim, Sounds beep)
 
     if (beep == SPRINT)
     {
-        frequency = 2000;
+        frequency = 750;
     }
     else if (beep == REST)
     {
-        frequency = 500;
+        frequency = 3000;
     }
 
     // Update the Timer Period for the desired frequency
@@ -132,6 +136,12 @@ void ExecutePress(Buttons button)
       {
         // START_WORKOUT()
         HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_SET);
+        HAL_Delay(1000);
+
+        // BEGIN SPRINT and TIMING
+        PlayBuzzer(&htim11,SPRINT);
+        prevTime_ = seconds;
+
         sysState_ = PLAY;
       }
       else if (sysState_ == PLAY)
