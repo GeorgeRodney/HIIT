@@ -22,8 +22,10 @@
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM10_Init(void);
+static void MX_TIM11_Init(void);
 
 TIM_HandleTypeDef htim10;
+TIM_HandleTypeDef htim11;
 
 
 int main(void)
@@ -32,6 +34,7 @@ int main(void)
   SystemClock_Config();
   MX_GPIO_Init();
   MX_TIM10_Init();
+  MX_TIM11_Init();
   // HAL_TIM_Base_Start_IT(&htim10);
 
   EventLoopC();
@@ -95,6 +98,33 @@ static void MX_TIM10_Init(void)
 
 }
 
+static void MX_TIM11_Init(void)
+{
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  __HAL_RCC_TIM11_CLK_ENABLE();
+
+  htim11.Instance = TIM11;
+  htim11.Init.Prescaler = 84-1;
+  htim11.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim11.Init.Period = 1000-1;
+  htim11.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim11.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim11) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 500;  // 50% Duty Cycle
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim11, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+      Error_Handler();
+  }
+
+}
+
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -116,6 +146,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BUTTON_GPIO_PORT, &GPIO_InitStruct);
+
+  // Configure PA8 as TIM1_CHANNEL_PWM
+  GPIO_InitStruct.Pin = GPIO_PIN_9;  // Pin connected to TIM1_CH1
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;  // Alternate Function Push-Pull
+  GPIO_InitStruct.Pull = GPIO_NOPULL;      // No Pull-Up or Pull-Down
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; // High speed
+  GPIO_InitStruct.Alternate = GPIO_AF3_TIM11;    // TIM1 AF mapping (AF1)
+
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 

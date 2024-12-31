@@ -5,9 +5,11 @@
 
 void ButtonPollingDebounced(void);
 void ExecutePress(Buttons button);
+void PlayBuzzer(TIM_HandleTypeDef* htim, Sounds beep);
 
 volatile uint32_t msCounter = 0;
 volatile uint32_t seconds = 0;
+uint32_t prevTime_;
 
 ButtonGPIOConfig buttonConfigs[BUTTON_COUNT] = {
   {BUTTON_PIN, BUTTON_GPIO_PORT}
@@ -21,6 +23,15 @@ SystemState sysState_ = PAUSE;
 void EventLoopCpp(void)
 {
     ButtonPollingDebounced();
+
+    if(sysState_ == PLAY)
+    {
+        if((seconds - prevTime_) >= 3)
+        {
+            PlayBuzzer(&htim11, SPRINT);
+            prevTime_ = seconds;
+        }
+    }
 }
 
 extern "C"
@@ -28,6 +39,7 @@ extern "C"
     void EventLoopC()
     {
         HAL_TIM_Base_Start_IT(&htim10);
+        prevTime_ = seconds;
 
         while(true)
         {
@@ -43,6 +55,37 @@ extern "C"
 //   // HAL_GPIO_TogglePin(MAIN_LED_GPIO_Port,MAIN_LED_Pin);
 //   prevTime = msCounter;
 // }
+
+void PlayBuzzer(TIM_HandleTypeDef *htim, Sounds beep)
+{   
+    uint32_t frequency;
+
+    if (beep == SPRINT)
+    {
+        frequency = 2000;
+    }
+    else if (beep == REST)
+    {
+        frequency = 500;
+    }
+
+    // Update the Timer Period for the desired frequency
+    uint32_t timerClock = 84000000;  // 84 MHz APB1 Timer Clock
+    uint32_t prescaler = htim->Init.Prescaler + 1;
+    uint32_t period = (timerClock / (prescaler * frequency)) - 1;
+
+    // Check validity and apply
+    if (period <= 0xFFFF)  // Ensure within 16-bit timer range
+    {
+        __HAL_TIM_SET_AUTORELOAD(htim, period);
+        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, period / 2);  // 50% Duty Cycle
+        HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);  // Start PWM
+
+        HAL_Delay(100);  // Play for 500 ms
+
+        HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_1);  // Stop PWM
+    }
+}
 
 void ButtonPollingDebounced(void)
 {

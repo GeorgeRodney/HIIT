@@ -47,6 +47,7 @@ void Error_Handler(void);
 #define COUNTER_MIN 0
 
 extern TIM_HandleTypeDef htim10;
+extern TIM_HandleTypeDef htim11;
 
 typedef struct {
   uint16_t pin;
@@ -64,6 +65,11 @@ typedef enum {
   SEC_UP,
   SEC_DOWN
 } Buttons;
+
+typedef enum {
+  SPRINT = 0,
+  REST
+} Sounds;
 
 extern ButtonGPIOConfig buttonConfigs[BUTTON_COUNT];
 
