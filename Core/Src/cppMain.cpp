@@ -20,6 +20,7 @@ int32_t bCounter[BUTTON_COUNT] = {0};
 uint8_t bPressed[BUTTON_COUNT] = {NOT_PRESSED};
 
 SystemState sysState_ = PAUSE;
+Sounds exercisePhase_ = REST;
 
 void EventLoopCpp(void)
 {

@@ -26,6 +26,7 @@ static void MX_TIM11_Init(void);
 
 TIM_HandleTypeDef htim10;
 TIM_HandleTypeDef htim11;
+UART_HandleTypeDef huart1;
 
 
 int main(void)
