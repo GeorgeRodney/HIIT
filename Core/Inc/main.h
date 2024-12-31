@@ -48,6 +48,7 @@ void Error_Handler(void);
 
 extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
+extern UART_HandleTypeDef huart1;
 
 typedef struct {
   uint16_t pin;
