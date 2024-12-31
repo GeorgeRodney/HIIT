@@ -9,8 +9,12 @@ void PlayBuzzer(TIM_HandleTypeDef* htim, Sounds beep);
 
 volatile uint32_t msCounter = 0;
 volatile uint32_t seconds = 0;
-uint32_t prevTime_;
-uint32_t sprintBeepTime_;
+
+uint32_t startPlayTime_;
+uint32_t sprintStartTime_;
+uint32_t sprintStopTime_;
+uint32_t restStartTime_;
+uint32_t restStopTime_;
 
 ButtonGPIOConfig buttonConfigs[BUTTON_COUNT] = {
   {BUTTON_PIN, BUTTON_GPIO_PORT}
@@ -28,12 +32,20 @@ void EventLoopCpp(void)
 
     if(sysState_ == PLAY)
     {   
-        if((seconds - prevTime_) >= 3) // MAKE THIS TIME USER DETERMINED
-        {
-            PlayBuzzer(&htim11, SPRINT);
-            prevTime_ = seconds;
-            sprintBeepTime_ = prevTime_;
-        }
+
+      if ((seconds - sprintStartTime_) >= 2)
+      {
+        restStartTime_ = seconds;
+        sprintStopTime_ = restStartTime_;
+        PlayBuzzer(&htim11, REST);
+      }
+
+      if((seconds - restStartTime_) >= 5)
+      {
+        sprintStartTime_ = seconds;
+        restStopTime_ = sprintStartTime_;
+        PlayBuzzer(&htim11, SPRINT);
+      }
     }
 
     // Ill need more timing thingys. 
@@ -44,7 +56,6 @@ extern "C"
     void EventLoopC()
     {
         HAL_TIM_Base_Start_IT(&htim10);
-        prevTime_ = seconds;
 
         while(true)
         {
@@ -140,8 +151,9 @@ void ExecutePress(Buttons button)
         HAL_Delay(1000);
 
         // BEGIN SPRINT and TIMING
+        restStopTime_ = seconds;
+        sprintStartTime_ = restStopTime_;
         PlayBuzzer(&htim11,SPRINT);
-        prevTime_ = seconds;
 
         sysState_ = PLAY;
       }
