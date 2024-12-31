@@ -1,14 +1,11 @@
 #include "cppMain.hpp"
 #include "main.h"
 #include "stm32f4xx_hal.h"
-
-
-void ButtonPollingDebounced(void);
-void ExecutePress(Buttons button);
-void PlayBuzzer(TIM_HandleTypeDef* htim, Sounds beep);
+#include <cstdio>
+#include <cstring>
 
 volatile uint32_t msCounter = 0;
-volatile uint32_t seconds = 0;
+volatile uint32_t timeInSeconds_ = 0;
 
 uint32_t startPlayTime_;
 uint32_t sprintStartTime_;
@@ -33,22 +30,24 @@ void EventLoopCpp(void)
     if(sysState_ == PLAY)
     {   
 
-      if ((seconds - sprintStartTime_) >= 2)
-      {
-        restStartTime_ = seconds;
-        sprintStopTime_ = restStartTime_;
-        PlayBuzzer(&htim11, REST);
-      }
+      WriteTime(timeInSeconds_);
+      WriteState(sysState_);
 
-      if((seconds - restStartTime_) >= 5)
-      {
-        sprintStartTime_ = seconds;
-        restStopTime_ = sprintStartTime_;
-        PlayBuzzer(&htim11, SPRINT);
-      }
+      // if ((timeInSeconds_ - sprintStartTime_) >= 5)
+      // {
+      //   restStartTime_ = timeInSeconds_;
+      //   sprintStopTime_ = restStartTime_;
+      //   PlayBuzzer(&htim11, REST);
+      // }
+
+      // if((timeInSeconds_ - restStartTime_) >= 2)
+      // {
+      //   sprintStartTime_ = timeInSeconds_;
+      //   restStopTime_ = sprintStartTime_;
+      //   PlayBuzzer(&htim11, SPRINT);
+      // }
     }
 
-    // Ill need more timing thingys. 
 }
 
 extern "C"
@@ -151,7 +150,7 @@ void ExecutePress(Buttons button)
         HAL_Delay(1000);
 
         // BEGIN SPRINT and TIMING
-        restStopTime_ = seconds;
+        restStopTime_ = timeInSeconds_;
         sprintStartTime_ = restStopTime_;
         PlayBuzzer(&htim11,SPRINT);
 
@@ -204,7 +203,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim10) {
 
         if(msCounter % 1000 == 0)
         {
-          seconds++;
+          timeInSeconds_++;
         }
     }
 }
@@ -212,4 +211,29 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim10) {
 void TIM10_IRQHandler(void)
 {
     HAL_TIM_IRQHandler(&htim10);
+}
+
+void WriteState(SystemState state)
+{
+    char buffer[10];
+
+    if (state == PLAY)
+    {
+      strcpy(buffer,"PLAY\r\n");
+    }else if (state == PAUSE)
+    {
+      strcpy(buffer,"PAUSE\r\n");
+    }else
+    {
+      strcpy(buffer, "Default\r\n");
+    }
+
+    HAL_UART_Transmit(&huart1, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
+}
+
+void WriteTime(uint32_t time)
+{
+    char buffer[14];
+    sprintf(buffer, "%lu\r\n", (unsigned long)time);
+    HAL_UART_Transmit(&huart1, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
 }
