@@ -6,8 +6,7 @@
 void ButtonPollingDebounced(void);
 void ExecutePress(Buttons button);
 
-// TIM_HandleTypeDef htim10;
-volatile uint32_t msCounter = 0;  // Millisecond counter
+volatile uint32_t msCounter = 0;
 volatile uint32_t seconds = 0;
 
 ButtonGPIOConfig buttonConfigs[BUTTON_COUNT] = {
@@ -48,7 +47,7 @@ extern "C"
 void ButtonPollingDebounced(void)
 {
 
-  for(uint8_t button = PLAY_PAUSE; button < BUTTON_COUNT; button++)
+  for(Buttons button = PLAY_PAUSE; button < BUTTON_COUNT; button = static_cast<Buttons>(button + 1))
   {
     
     // Increment or decrement the button counter
@@ -67,7 +66,7 @@ void ButtonPollingDebounced(void)
           (bPressed[button] == NOT_PRESSED))
     {
       bPressed[button] = PRESSED;
-      ExecutePress(static_cast<Buttons>(button));
+      ExecutePress(button);
     }
 
     // Check transition: PRESSED -> NOT_PRESSED?
