@@ -35,21 +35,21 @@ void EventLoopCpp(void)
     if(sysState_ == PLAY)
     {   
 
-      if (((timeInSeconds_ - sprintStartTime_) >= totalSprintTime_) && SPRINT)
+      if(((timeInSeconds_ - sprintStartTime_) >= totalSprintTime_) && (exercisePhase_ == SPRINT))
       {
         restStartTime_ = timeInSeconds_;
         sprintStopTime_ = restStartTime_;
         exercisePhase_ = REST;
+        HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_RESET);
         PlayBuzzer(&htim11, REST);
-
-
       }
 
-      if(((timeInSeconds_ - restStartTime_) >= totalRestTime_) && REST)
+      if(((timeInSeconds_ - restStartTime_) >= totalRestTime_) && (exercisePhase_ == REST))
       {
         sprintStartTime_ = timeInSeconds_;
         restStopTime_ = sprintStartTime_;
-        exercisePhase_ = SPRINT; 
+        exercisePhase_ = SPRINT;
+        HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_SET);
         PlayBuzzer(&htim11, SPRINT);
       }
     }
@@ -83,11 +83,11 @@ void PlayBuzzer(TIM_HandleTypeDef *htim, Sounds beep)
 
     if (beep == SPRINT)
     {
-        frequency = 750;
+        frequency = 1000;
     }
     else if (beep == REST)
     {
-        frequency = 3000;
+        frequency = 200;
     }
 
     // Update the Timer Period for the desired frequency
@@ -157,6 +157,7 @@ void ExecutePress(Buttons button)
         // BEGIN SPRINT and TIMING
         restStopTime_ = timeInSeconds_;
         sprintStartTime_ = restStopTime_;
+        exercisePhase_ = SPRINT;
         PlayBuzzer(&htim11,SPRINT);
 
         sysState_ = PLAY;
@@ -168,7 +169,7 @@ void ExecutePress(Buttons button)
         sysState_ = PAUSE;
       }
 
-      WriteState(sysState_);
+      // WriteState(sysState_);
 
       break;
     
