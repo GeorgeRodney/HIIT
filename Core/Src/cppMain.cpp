@@ -13,6 +13,9 @@ uint32_t sprintStopTime_;
 uint32_t restStartTime_;
 uint32_t restStopTime_;
 
+uint32_t totalSprintTime_ = 2;
+uint32_t totalRestTime_ = 5;
+
 ButtonGPIOConfig buttonConfigs[BUTTON_COUNT] = {
   {BUTTON_PIN, BUTTON_GPIO_PORT}
 };
@@ -32,19 +35,23 @@ void EventLoopCpp(void)
     if(sysState_ == PLAY)
     {   
 
-      // if ((timeInSeconds_ - sprintStartTime_) >= 5)
-      // {
-      //   restStartTime_ = timeInSeconds_;
-      //   sprintStopTime_ = restStartTime_;
-      //   PlayBuzzer(&htim11, REST);
-      // }
+      if (((timeInSeconds_ - sprintStartTime_) >= totalSprintTime_) && SPRINT)
+      {
+        restStartTime_ = timeInSeconds_;
+        sprintStopTime_ = restStartTime_;
+        exercisePhase_ = REST;
+        PlayBuzzer(&htim11, REST);
 
-      // if((timeInSeconds_ - restStartTime_) >= 2)
-      // {
-      //   sprintStartTime_ = timeInSeconds_;
-      //   restStopTime_ = sprintStartTime_;
-      //   PlayBuzzer(&htim11, SPRINT);
-      // }
+
+      }
+
+      if(((timeInSeconds_ - restStartTime_) >= totalRestTime_) && REST)
+      {
+        sprintStartTime_ = timeInSeconds_;
+        restStopTime_ = sprintStartTime_;
+        exercisePhase_ = SPRINT; 
+        PlayBuzzer(&htim11, SPRINT);
+      }
     }
 
 }
