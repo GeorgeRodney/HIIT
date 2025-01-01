@@ -9,7 +9,7 @@ void ButtonPollingDebounced(void);
 void ExecutePress(Buttons button);
 void PlayBuzzer(TIM_HandleTypeDef* htim, Sounds beep);
 void WriteState(SystemState state);
-void WriteTime(uint32_t time);
+void WriteNum(uint32_t time);
 
 // Declarations for C code compatibility
 #ifdef __cplusplus

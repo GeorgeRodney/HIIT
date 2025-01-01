@@ -17,7 +17,7 @@ ButtonGPIOConfig buttonConfigs[BUTTON_COUNT] = {
   {BUTTON_PIN, BUTTON_GPIO_PORT}
 };
 
-int32_t bCounter[BUTTON_COUNT] = {0};
+uint32_t bCounter[BUTTON_COUNT] = {0};
 uint8_t bPressed[BUTTON_COUNT] = {NOT_PRESSED};
 
 SystemState sysState_ = PAUSE;
@@ -27,11 +27,10 @@ void EventLoopCpp(void)
 {
     ButtonPollingDebounced();
 
+    // WriteState(sysState_);
+
     if(sysState_ == PLAY)
     {   
-
-      WriteTime(timeInSeconds_);
-      WriteState(sysState_);
 
       // if ((timeInSeconds_ - sprintStartTime_) >= 5)
       // {
@@ -147,7 +146,6 @@ void ExecutePress(Buttons button)
       {
         // START_WORKOUT()
         HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_SET);
-        HAL_Delay(1000);
 
         // BEGIN SPRINT and TIMING
         restStopTime_ = timeInSeconds_;
@@ -162,6 +160,8 @@ void ExecutePress(Buttons button)
         HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_RESET);
         sysState_ = PAUSE;
       }
+
+      WriteState(sysState_);
 
       break;
     
@@ -231,7 +231,7 @@ void WriteState(SystemState state)
     HAL_UART_Transmit(&huart1, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
 }
 
-void WriteTime(uint32_t time)
+void WriteNum(uint32_t time)
 {
     char buffer[14];
     sprintf(buffer, "%lu\r\n", (unsigned long)time);

@@ -74,7 +74,7 @@ typedef enum {
 
 extern ButtonGPIOConfig buttonConfigs[BUTTON_COUNT];
 
-extern int32_t  bCounter[BUTTON_COUNT];
+extern uint32_t  bCounter[BUTTON_COUNT];
 extern uint8_t  bPressed[BUTTON_COUNT];
 
 #ifdef __cplusplus
