@@ -10,6 +10,9 @@ void ExecutePress(Buttons button);
 void PlayBuzzer(TIM_HandleTypeDef* htim, Sounds beep);
 void WriteState(SystemState state);
 void WriteNum(uint32_t time);
+void IncrementIntervalInSecs(void);
+void DecrementIntervalInSecs(void);
+void ToggleSprintRestState(void);
 
 // Declarations for C code compatibility
 #ifdef __cplusplus

@@ -45,6 +45,10 @@ void Error_Handler(void);
 #define NOT_PRESSED_COUNT 2500
 #define COUNTER_MAX 15000
 #define COUNTER_MIN 0
+#define SPRINT_UP_LIM 60*5
+#define SPRINT_LOW_LIM 5
+#define REST_UP_LIM 60*20
+#define REST_LOW_LIM 5
 
 extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
@@ -71,6 +75,11 @@ typedef enum {
   SPRINT = 0,
   REST
 } Sounds;
+
+typedef enum {
+  SELECT_SPRINT = 0,
+  SELECT_REST
+} MenuInterval;
 
 extern ButtonGPIOConfig buttonConfigs[BUTTON_COUNT];
 

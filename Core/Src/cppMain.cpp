@@ -13,7 +13,7 @@ uint32_t sprintStopTime_;
 uint32_t restStartTime_;
 uint32_t restStopTime_;
 
-uint32_t totalSprintTime_ = 2;
+uint32_t totalSprintTime_ = 5;
 uint32_t totalRestTime_ = 5;
 
 ButtonGPIOConfig buttonConfigs[BUTTON_COUNT] = {
@@ -25,6 +25,7 @@ uint8_t bPressed[BUTTON_COUNT] = {NOT_PRESSED};
 
 SystemState sysState_ = PAUSE;
 Sounds exercisePhase_ = REST;
+MenuInterval selectState_ = SELECT_SPRINT;
 
 void EventLoopCpp(void)
 {
@@ -167,6 +168,7 @@ void ExecutePress(Buttons button)
         // PAUSE_MENU()
         HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_RESET);
         sysState_ = PAUSE;
+
       }
 
       // WriteState(sysState_);
@@ -179,6 +181,8 @@ void ExecutePress(Buttons button)
         break;
       }
 
+      ToggleSprintRestState();
+
       // DO SOMETHING IF IN PAUSE
       break;
 
@@ -187,6 +191,8 @@ void ExecutePress(Buttons button)
       {
         break;
       }
+
+      IncrementIntervalInSecs();
 
       // DO SOMETHING IF IN PAUSE
       break;
@@ -202,6 +208,89 @@ void ExecutePress(Buttons button)
 
     default:
       break;
+  }
+}
+
+void ToggleSprintRestState(void)
+{
+  if (selectState_ == SELECT_SPRINT)
+  {
+    selectState_ = SELECT_REST;
+    // Annouce Select State
+  }
+  else if (selectState_ == SELECT_REST)
+  {
+    selectState_ = SELECT_SPRINT;
+    // Announce Select State
+  }
+}
+
+void IncrementIntervalInSecs(void)
+{
+  // INCREMENT
+  if (SELECT_SPRINT)
+  {
+    // Announce SPRINT
+    if (totalSprintTime_ < SPRINT_UP_LIM)
+    {
+      totalSprintTime_ += 5;
+    }
+
+  }
+  else if (SELECT_REST)
+  {
+    //Announce REST
+    if (totalRestTime_ < REST_UP_LIM)
+    {
+      totalRestTime_ += 5;
+    }
+  }
+
+  // APPLY  LIMITS
+  if (totalSprintTime_ > SPRINT_UP_LIM)
+  {
+    totalSprintTime_ = SPRINT_UP_LIM;
+    // Announce upper limit reached
+  }
+
+  if (totalRestTime_ > REST_UP_LIM)
+  {
+    totalRestTime_ = REST_UP_LIM;
+    // Announce upper limit reached
+  }
+}
+
+void DecrementIntervalInSecs(void)
+{
+  // INCREMENT
+  if (SELECT_SPRINT)
+  {
+    // Announce SPRINT
+    if (totalSprintTime_ >= 5)
+    {
+      totalSprintTime_ -= 5;
+    }
+  }
+  else if (SELECT_REST)
+  {
+    //Announce REST
+    if (totalRestTime_ >= 5)
+    {
+      totalRestTime_ -=5;
+    }
+  }
+
+  // APPLY  LIMITS
+  if (totalSprintTime_ < SPRINT_LOW_LIM)
+  {
+    totalSprintTime_ = SPRINT_LOW_LIM;
+    // Announce upper limit reached
+  }
+
+  if (totalRestTime_ < REST_UP_LIM)
+  {
+    totalRestTime_ = REST_UP_LIM;
+    // Announce upper limit reached
   }
 }
 
