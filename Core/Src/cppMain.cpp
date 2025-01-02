@@ -13,11 +13,14 @@ uint32_t sprintStopTime_;
 uint32_t restStartTime_;
 uint32_t restStopTime_;
 
-uint32_t totalSprintTime_ = 5;
-uint32_t totalRestTime_ = 5;
+uint32_t totalSprintTime_ = 2;
+uint32_t totalRestTime_ = 4;
 
 ButtonGPIOConfig buttonConfigs[BUTTON_COUNT] = {
-  {BUTTON_PIN, BUTTON_GPIO_PORT}
+  {PLAY_PAUSE_BUTTON, BUTTON_GPIO_PORT},
+  {TOGGLE_BUTTON, BUTTON_GPIO_PORT},
+  {UP_BUTTON, BUTTON_GPIO_PORT},
+  {DOWN_BUTTON, BUTTON_GPIO_PORT}
 };
 
 uint32_t bCounter[BUTTON_COUNT] = {0};
@@ -31,7 +34,7 @@ void EventLoopCpp(void)
 {
     ButtonPollingDebounced();
 
-    // WriteState(sysState_);
+    // WriteNum(totalSprintTime_);
 
     if(sysState_ == PLAY)
     {   
@@ -71,13 +74,6 @@ extern "C"
 
 }
 
-// // Check timing
-// if((msCounter - prevTime) >= 500)
-// {
-//   // HAL_GPIO_TogglePin(MAIN_LED_GPIO_Port,MAIN_LED_Pin);
-//   prevTime = msCounter;
-// }
-
 void PlayBuzzer(TIM_HandleTypeDef *htim, Sounds beep)
 {   
     uint32_t frequency;
@@ -102,16 +98,13 @@ void PlayBuzzer(TIM_HandleTypeDef *htim, Sounds beep)
         __HAL_TIM_SET_AUTORELOAD(htim, period);
         __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, period / 2);  // 50% Duty Cycle
         HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);  // Start PWM
-
         HAL_Delay(100);  // Play for 500 ms
-
         HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_1);  // Stop PWM
     }
 }
 
 void ButtonPollingDebounced(void)
 {
-
   for(Buttons button = PLAY_PAUSE; button < BUTTON_COUNT; button = static_cast<Buttons>(button + 1))
   {
     
@@ -121,7 +114,7 @@ void ButtonPollingDebounced(void)
     {
       bCounter[button]++;
     }
-    else if ((pressResult == HIGH) && (bCounter[button] > 0))
+    else if ((pressResult == HIGH) && (bCounter[button] > COUNTER_MIN))
     {
       bCounter[button]--;
     }
@@ -182,6 +175,7 @@ void ExecutePress(Buttons button)
       }
 
       ToggleSprintRestState();
+      HAL_GPIO_TogglePin(USER_LED_GPIO_PORT, USER_LED_Pin);
 
       // DO SOMETHING IF IN PAUSE
       break;
@@ -193,6 +187,7 @@ void ExecutePress(Buttons button)
       }
 
       IncrementIntervalInSecs();
+      HAL_GPIO_TogglePin(USER_LED_GPIO_PORT, USER_LED_Pin);
 
       // DO SOMETHING IF IN PAUSE
       break;
@@ -203,6 +198,8 @@ void ExecutePress(Buttons button)
         break;
       }
 
+      DecrementIntervalInSecs();
+      HAL_GPIO_TogglePin(USER_LED_GPIO_PORT, USER_LED_Pin);
       // DO SOMETHING IF IN PAUSE
       break;
 
@@ -233,7 +230,7 @@ void IncrementIntervalInSecs(void)
     // Announce SPRINT
     if (totalSprintTime_ < SPRINT_UP_LIM)
     {
-      totalSprintTime_ += 5;
+      totalSprintTime_ += 1;
     }
 
   }
@@ -242,7 +239,7 @@ void IncrementIntervalInSecs(void)
     //Announce REST
     if (totalRestTime_ < REST_UP_LIM)
     {
-      totalRestTime_ += 5;
+      totalRestTime_ += 1;
     }
   }
 
@@ -266,17 +263,17 @@ void DecrementIntervalInSecs(void)
   if (SELECT_SPRINT)
   {
     // Announce SPRINT
-    if (totalSprintTime_ >= 5)
+    if (totalSprintTime_ >= SPRINT_LOW_LIM)
     {
-      totalSprintTime_ -= 5;
+      totalSprintTime_ -= 1;
     }
   }
   else if (SELECT_REST)
   {
     //Announce REST
-    if (totalRestTime_ >= 5)
+    if (totalRestTime_ >= REST_LOW_LIM)
     {
-      totalRestTime_ -=5;
+      totalRestTime_ -=1;
     }
   }
 
@@ -287,20 +284,28 @@ void DecrementIntervalInSecs(void)
     // Announce upper limit reached
   }
 
-  if (totalRestTime_ < REST_UP_LIM)
+  if (totalRestTime_ < REST_LOW_LIM)
   {
-    totalRestTime_ = REST_UP_LIM;
+    totalRestTime_ = REST_LOW_LIM;
     // Announce upper limit reached
   }
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim10) {
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim10)
+{
     if (htim10->Instance == TIM10) {
         msCounter++;
 
         if(msCounter % 1000 == 0)
         {
           timeInSeconds_++;
+
+          // I dont think I need this.
+          // The seconds will run for 138 years
+          // if (timeInSeconds_ >= 4294967295)
+          // {
+          //   timeInSeconds_ = 0;
+          // }
         }
     }
 }

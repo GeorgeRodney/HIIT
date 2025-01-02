@@ -148,6 +148,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  // __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_RESET);
@@ -160,10 +161,15 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(USER_LED_GPIO_PORT, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BUTTON_PIN_Pin */
-  GPIO_InitStruct.Pin = BUTTON_PIN;
+  GPIO_InitStruct.Pin = PLAY_PAUSE_BUTTON | TOGGLE_BUTTON | UP_BUTTON | DOWN_BUTTON;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BUTTON_GPIO_PORT, &GPIO_InitStruct);
+
+  // GPIO_InitStruct.Pin = UP_BUTTON;
+  // GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  // GPIO_InitStruct.Pull = GPIO_PULLUP;
+  // HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   // Configure PA8 as TIM1_CHANNEL_PWM
   GPIO_InitStruct.Pin = GPIO_PIN_9;  // Pin connected to TIM1_CH1
@@ -171,7 +177,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;      // No Pull-Up or Pull-Down
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; // High speed
   GPIO_InitStruct.Alternate = GPIO_AF3_TIM11;    // TIM1 AF mapping (AF1)
-
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }

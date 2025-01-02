@@ -33,22 +33,25 @@ void Error_Handler(void);
 #define USER_LED_Pin GPIO_PIN_14
 #define RUN_LED GPIO_PIN_15
 #define USER_LED_GPIO_PORT GPIOC
-#define BUTTON_PIN GPIO_PIN_0
+#define PLAY_PAUSE_BUTTON GPIO_PIN_0
 #define BUTTON_GPIO_PORT GPIOB
+#define TOGGLE_BUTTON GPIO_PIN_1
+#define UP_BUTTON GPIO_PIN_12
+#define DOWN_BUTTON GPIO_PIN_13
 
 #define LOW 0
 #define HIGH 1
-#define BUTTON_COUNT 1
+#define BUTTON_COUNT 4
 #define PRESSED 1
 #define NOT_PRESSED 0
 #define PRESSED_COUNT 12500
 #define NOT_PRESSED_COUNT 2500
 #define COUNTER_MAX 15000
 #define COUNTER_MIN 0
-#define SPRINT_UP_LIM 60*5
-#define SPRINT_LOW_LIM 5
-#define REST_UP_LIM 60*20
-#define REST_LOW_LIM 5
+#define SPRINT_UP_LIM 60
+#define SPRINT_LOW_LIM 2
+#define REST_UP_LIM 60
+#define REST_LOW_LIM 2
 
 extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
@@ -82,7 +85,6 @@ typedef enum {
 } MenuInterval;
 
 extern ButtonGPIOConfig buttonConfigs[BUTTON_COUNT];
-
 extern uint32_t  bCounter[BUTTON_COUNT];
 extern uint8_t  bPressed[BUTTON_COUNT];
 
