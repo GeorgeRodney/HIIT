@@ -34,8 +34,13 @@ void EventLoopCpp(void)
 {
     ButtonPollingDebounced();
 
-    // WriteNum(totalSprintTime_);
-
+    // >-----------------------------------------------------------------------------------------<
+    //
+    //  CHECK FOR WHETHER OR NOT TO SWAP FROM SPRINT TO REST or REST TO SPRINT
+    //  
+    //
+    //
+    // >-----------------------------------------------------------------------------------------<
     if(sysState_ == PLAY)
     {   
 
