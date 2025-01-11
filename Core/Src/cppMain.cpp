@@ -27,7 +27,8 @@ uint32_t bCounter[BUTTON_COUNT] = {0};
 uint8_t bPressed[BUTTON_COUNT] = {NOT_PRESSED};
 
 SystemState sysState_ = PAUSE;
-Sounds exercisePhase_ = REST;
+ExerciseState exercisePhase_ = REST;
+Sounds soundState = SPRINT_BEEP;
 MenuInterval selectState_ = SELECT_SPRINT;
 
 void EventLoopCpp(void)
@@ -48,7 +49,7 @@ void EventLoopCpp(void)
         sprintStopTime_ = restStartTime_;
         exercisePhase_ = REST;
         HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_RESET);
-        PlayBuzzer(&htim11, REST);
+        PlayBuzzer(&htim11, REST_BEEP);
       }
 
       if(((timeInSeconds_ - restStartTime_) >= totalRestTime_) && (exercisePhase_ == REST))
@@ -57,7 +58,7 @@ void EventLoopCpp(void)
         restStopTime_ = sprintStartTime_;
         exercisePhase_ = SPRINT;
         HAL_GPIO_WritePin(USER_LED_GPIO_PORT, USER_LED_Pin, GPIO_PIN_SET);
-        PlayBuzzer(&htim11, SPRINT);
+        PlayBuzzer(&htim11, SPRINT_BEEP);
       }
     }
 
@@ -81,11 +82,15 @@ void PlayBuzzer(TIM_HandleTypeDef *htim, Sounds beep)
 {   
     uint32_t frequency;
 
-    if (beep == SPRINT)
+    if (beep == SPRINT_BEEP)
     {
         frequency = 4000;
     }
-    else if (beep == REST)
+    else if (beep == REST_BEEP)
+    {
+        frequency = 1000;
+    }
+    else if (beep == PRESS_BEEP)
     {
         frequency = 200;
     }
@@ -101,7 +106,7 @@ void PlayBuzzer(TIM_HandleTypeDef *htim, Sounds beep)
         __HAL_TIM_SET_AUTORELOAD(htim, period);
         __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, period / 2);  // 50% Duty Cycle
         HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);  // Start PWM
-        HAL_Delay(100);  // Play for 500 ms
+        HAL_Delay(BUZZER_LENGTH);  // Play for 500 ms
         HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_1);  // Stop PWM
     }
 }
@@ -155,7 +160,7 @@ void ExecutePress(Buttons button)
         restStopTime_ = timeInSeconds_;
         sprintStartTime_ = restStopTime_;
         exercisePhase_ = SPRINT;
-        PlayBuzzer(&htim11,SPRINT);
+        PlayBuzzer(&htim11,SPRINT_BEEP);
 
         sysState_ = PLAY;
       }
@@ -179,6 +184,7 @@ void ExecutePress(Buttons button)
 
       ToggleSprintRestState();
       HAL_GPIO_TogglePin(USER_LED_GPIO_PORT, USER_LED_Pin);
+      PlayBuzzer(&htim11, PRESS_BEEP);
 
       // DO SOMETHING IF IN PAUSE
       break;
@@ -191,6 +197,7 @@ void ExecutePress(Buttons button)
 
       IncrementIntervalInSecs();
       HAL_GPIO_TogglePin(USER_LED_GPIO_PORT, USER_LED_Pin);
+      PlayBuzzer(&htim11, PRESS_BEEP);
 
       // DO SOMETHING IF IN PAUSE
       break;
@@ -203,6 +210,7 @@ void ExecutePress(Buttons button)
 
       DecrementIntervalInSecs();
       HAL_GPIO_TogglePin(USER_LED_GPIO_PORT, USER_LED_Pin);
+      PlayBuzzer(&htim11, PRESS_BEEP);
       // DO SOMETHING IF IN PAUSE
       break;
 
@@ -271,7 +279,7 @@ void DecrementIntervalInSecs(void)
   if (selectState_ == SELECT_SPRINT)
   {
     // Announce SPRINT
-    if (totalSprintTime_ >= SPRINT_LOW_LIM)
+    if (totalSprintTime_ > SPRINT_LOW_LIM)
     {
       totalSprintTime_--;
     }
@@ -279,7 +287,7 @@ void DecrementIntervalInSecs(void)
   else if (selectState_ == SELECT_REST)
   {
     //Announce REST
-    if (totalRestTime_ >= REST_LOW_LIM)
+    if (totalRestTime_ > REST_LOW_LIM)
     {
       totalRestTime_--;
     }

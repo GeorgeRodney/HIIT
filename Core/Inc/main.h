@@ -52,6 +52,7 @@ void Error_Handler(void);
 #define SPRINT_LOW_LIM 2
 #define REST_UP_LIM 60
 #define REST_LOW_LIM 2
+#define BUZZER_LENGTH 100
 
 extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
@@ -75,9 +76,15 @@ typedef enum {
 } Buttons;
 
 typedef enum {
+  SPRINT_BEEP = 0,
+  REST_BEEP,
+  PRESS_BEEP
+} Sounds;
+
+typedef enum {
   SPRINT = 0,
   REST
-} Sounds;
+} ExerciseState;
 
 typedef enum {
   SELECT_SPRINT = 0,
