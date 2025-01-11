@@ -38,8 +38,6 @@ void EventLoopCpp(void)
     //
     //  CHECK FOR WHETHER OR NOT TO SWAP FROM SPRINT TO REST or REST TO SPRINT
     //  
-    //
-    //
     // >-----------------------------------------------------------------------------------------<
     if(sysState_ == PLAY)
     {   
@@ -213,6 +211,7 @@ void ExecutePress(Buttons button)
   }
 }
 
+// extern "C"{
 void ToggleSprintRestState(void)
 {
   if (selectState_ == SELECT_SPRINT)
@@ -226,75 +225,80 @@ void ToggleSprintRestState(void)
     // Announce Select State
   }
 }
+// }
 
+// extern "C"{
 void IncrementIntervalInSecs(void)
 {
   // INCREMENT
-  if (SELECT_SPRINT)
+  if (selectState_ == SELECT_SPRINT)
   {
     // Announce SPRINT
     if (totalSprintTime_ < SPRINT_UP_LIM)
     {
-      totalSprintTime_ += 1;
+      totalSprintTime_++;
     }
 
   }
-  else if (SELECT_REST)
+  else if (selectState_ == SELECT_REST)
   {
     //Announce REST
     if (totalRestTime_ < REST_UP_LIM)
     {
-      totalRestTime_ += 1;
+      totalRestTime_++;
     }
   }
 
-  // APPLY  LIMITS
-  if (totalSprintTime_ > SPRINT_UP_LIM)
-  {
-    totalSprintTime_ = SPRINT_UP_LIM;
-    // Announce upper limit reached
-  }
+  // // APPLY  LIMITS
+  // if (totalSprintTime_ > SPRINT_UP_LIM)
+  // {
+  //   totalSprintTime_ = SPRINT_UP_LIM;
+  //   // Announce upper limit reached
+  // }
 
-  if (totalRestTime_ > REST_UP_LIM)
-  {
-    totalRestTime_ = REST_UP_LIM;
-    // Announce upper limit reached
-  }
+  // if (totalRestTime_ > REST_UP_LIM)
+  // {
+  //   totalRestTime_ = REST_UP_LIM;
+  //   // Announce upper limit reached
+  // }
 }
+// }
 
+// extern "C"{
 void DecrementIntervalInSecs(void)
 {
   // INCREMENT
-  if (SELECT_SPRINT)
+  if (selectState_ == SELECT_SPRINT)
   {
     // Announce SPRINT
     if (totalSprintTime_ >= SPRINT_LOW_LIM)
     {
-      totalSprintTime_ -= 1;
+      totalSprintTime_--;
     }
   }
-  else if (SELECT_REST)
+  else if (selectState_ == SELECT_REST)
   {
     //Announce REST
     if (totalRestTime_ >= REST_LOW_LIM)
     {
-      totalRestTime_ -=1;
+      totalRestTime_--;
     }
   }
 
-  // APPLY  LIMITS
-  if (totalSprintTime_ < SPRINT_LOW_LIM)
-  {
-    totalSprintTime_ = SPRINT_LOW_LIM;
-    // Announce upper limit reached
-  }
+  // // APPLY  LIMITS
+  // if (totalSprintTime_ < SPRINT_LOW_LIM)
+  // {
+  //   totalSprintTime_ = SPRINT_LOW_LIM;
+  //   // Announce upper limit reached
+  // }
 
-  if (totalRestTime_ < REST_LOW_LIM)
-  {
-    totalRestTime_ = REST_LOW_LIM;
-    // Announce upper limit reached
-  }
+  // if (totalRestTime_ < REST_LOW_LIM)
+  // {
+  //   totalRestTime_ = REST_LOW_LIM;
+  //   // Announce upper limit reached
+  // }
 }
+// }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim10)
 {
