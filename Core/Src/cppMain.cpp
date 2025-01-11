@@ -85,7 +85,7 @@ void PlayBuzzer(TIM_HandleTypeDef *htim, Sounds beep)
 
     if (beep == SPRINT)
     {
-        frequency = 1000;
+        frequency = 4000;
     }
     else if (beep == REST)
     {
